@@ -1,0 +1,49 @@
+# ===== OS / IDE =====
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# ===== Logs / Runs =====
+runs/
+*.log
+
+# ===== Training artifacts (建议不提交) =====
+checkpoints/
+exports/
+# 如果 results 里只有表格/图片（小文件）想提交，就注释掉下一行
+# results/
+
+# ===== Dataset (强烈不要提交) =====
+data/
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# ===== Large model files (默认不提交，除非你明确要用 LFS) =====
+*.pth
+*.pt
+*.onnx
+*.engine
+*.trt
+*.ckpt
+
+# ===== Secrets (防止误提交) =====
+.env
+*.key
+*.pem
