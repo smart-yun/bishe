@@ -39,5 +39,11 @@ git push //推送github
 
 
 
+gpt上
+
+重新安装torch 
+
+数据集下载 跑起来
+
 
 
