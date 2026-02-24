@@ -47,3 +47,16 @@ data/
 .env
 *.key
 *.pem
+
+
+# datasets (do not commit)
+data/railsem19/
+data/RailSem19/
+data/**/jpgs/
+data/**/uint8/
+data/**/jsons/
+
+# large outputs
+results/vis_check/
+checkpoints/
+runs/

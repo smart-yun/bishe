@@ -39,3 +39,25 @@ cudnn: 90100
 mmcv: 2.1.0
 mmengine: 0.10.7
 mmseg: 1.2.2
+
+
+===== RS19 SPLITS =====
+   6800 data/splits/train.txt
+    850 data/splits/val.txt
+    850 data/splits/test.txt
+   8500 total
+===== RS19 VIS CHECK (last lines) =====
+[INFO] loaded 6800 pairs from /home/lcy/Projects/bishe/data/splits/train.txt
+[INFO] bad_shape_count=0, bad_value_count=0
+[INFO] saved 50 visuals to /home/lcy/Projects/bishe/results/vis_check
+===== TOP10 GRID =====
+-rw-r--r-- 1 lcy lcy 1.9M Feb 24 19:49 results/vis_check_grid/summary_grid.png
+
+
+numpy 1.26.4
+torch 2.1.0+cu118 cuda 11.8 avail True
+gpu NVIDIA GeForce RTX 3050 Laptop GPU
+mmcv 2.1.0
+mmengine 0.10.7
+mmseg 1.2.2
+mmcv.ops OK
