@@ -1,3 +1,4 @@
+from __future__ import annotations
 """RailSem19 dataset adapter for MMSegmentation.
 
 This project keeps split files (data/splits_mmseg/*.txt) where each line is an
@@ -13,7 +14,7 @@ MMSeg 1.x no longer registers the legacy "CustomDataset" by default, so we
 provide a tiny BaseSegDataset subclass that implements this jpg->png mapping.
 """
 
-from __future__ import annotations
+
 
 import os.path as osp
 from typing import List

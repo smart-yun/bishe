@@ -4,6 +4,8 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+*:Zone.Identifier
+
 
 # ===== Python =====
 __pycache__/
@@ -60,3 +62,13 @@ data/**/jsons/
 results/vis_check/
 checkpoints/
 runs/
+
+# third-party/vendor and build artifacts
+mmsegmentation-main/
+mmsegmentation-*.whl
+condaenv.*.requirements.txt
+
+# generated curve figures/summaries
+results/curves/
+results/miou_curve_critical.png
+results/miou_curve_critical_summary.json

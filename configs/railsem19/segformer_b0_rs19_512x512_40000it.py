@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # SegFormer-B0 baseline for RailSem19 (500 iters sanity run)
 
 _base_ = [
@@ -57,15 +59,19 @@ train_split = '../splits_mmseg/train.txt'
 val_split   = '../splits_mmseg/val.txt'
 test_split  = '../splits_mmseg/test.txt'
 
+# ---------- Dataloader（add sampler） ----------
 train_dataloader = dict(
     batch_size=2,
     num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='InfiniteSampler', shuffle=True),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
         data_prefix=dict(img_path=img_dir, seg_map_path=ann_dir),
         ann_file=train_split,
         metainfo=metainfo,
+        
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', reduce_zero_label=False),
@@ -81,6 +87,8 @@ train_dataloader = dict(
 val_dataloader = dict(
     batch_size=1,
     num_workers=2,
+    persistent_workers=True,
+    sampler=dict(type='DefaultSampler', shuffle=False),
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
@@ -95,20 +103,22 @@ val_dataloader = dict(
         ],
     )
 )
+
 test_dataloader = val_dataloader
 
 # -----------------------
 # Model head
 # -----------------------
+ignore_index = 255
 model = dict(
     decode_head=dict(
         num_classes=num_classes,
-        ignore_index=255,
+        ignore_index=ignore_index,
         loss_decode=dict(
             type='CrossEntropyLoss',
             use_sigmoid=False,
-            loss_weight=1.0,
-            # ignore_index=255
+            loss_weight=1.0
+            # ignore_index=ignore_index
         ),
     )
 )
@@ -116,7 +126,7 @@ model = dict(
 # -----------------------
 # Train schedule: 500 iters sanity run
 # -----------------------
-train_cfg = dict(type='IterBasedTrainLoop', max_iters=500, val_interval=100)
+train_cfg = dict(type='IterBasedTrainLoop', max_iters=40000, val_interval=2000)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 
@@ -125,9 +135,12 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=1.0, norm_type=2)
 )
 
+max_iters = 40000
+warmup_iters = 500  # 500 or 1000
+
 param_scheduler = [
-    dict(type='LinearLR', start_factor=1e-6, by_epoch=False, begin=0, end=50),
-    dict(type='PolyLR', eta_min=0.0, power=1.0, by_epoch=False, begin=50, end=500),
+    dict(type='LinearLR', start_factor=1e-6, by_epoch=False, begin=0, end=warmup_iters),
+    dict(type='PolyLR', eta_min=0.0, power=1.0, by_epoch=False, begin=warmup_iters, end=max_iters),
 ]
 
 # mIoU
@@ -136,9 +149,23 @@ test_evaluator = val_evaluator
 
 # Logging & visualization
 default_hooks = dict(
+    timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=20),
-    checkpoint=dict(type='CheckpointHook', interval=500, save_best='mIoU'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    checkpoint=dict(type='CheckpointHook', interval=5000, save_best='mIoU'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
     visualization=dict(type='SegVisualizationHook', draw=True, interval=50),
 )
 
-work_dir = 'runs/rs19/segformer_b0_512x512_500it'
+
+# ---------- TensorBoard（shotscreen） ----------
+visualizer = dict(
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+        dict(type='TensorboardVisBackend'),
+    ],
+    name='visualizer'
+)
+
+work_dir = 'runs/rs19/segformer_b0_512x512_40000it'

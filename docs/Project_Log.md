@@ -316,3 +316,90 @@ git commit -m "feat: add RailSem19 splits and GT overlay checks"
 git push
 
 不建议提交 results/vis_check/ 50 张（可留在本地）；若导师要求留痕，可只提交 top10 + summary_grid。
+
+
+---
+
+## 2026-04-03 剪枝实验矩阵模板（可直接填写）
+
+> 适用范围：SegFormer-B0（RailSem19，输入 512x512）
+>
+> 使用方式：每做完一个实验，先更新「实验矩阵总表」1 行，再复制「单次实验记录卡」填写详细信息。
+
+### A. 实验矩阵总表（总览）
+
+| ExpID | 方案 | 剪枝对象 | 剪枝比例 | 微调 Iter | 预训练来源 | mIoU(%) | Params(M) | FLOPs(G) | Latency(ms) | FPS | 结论 | Checkpoint |
+|---|---|---|---:|---:|---|---:|---:|---:|---:|---:|---|---|
+| baseline | - | - | 0 | 0 | best_mIoU_iter_40000 | 57.16 | 待填 | 待填 | 待填 | 待填 | 基线 | `runs/rs19/.../best_mIoU_iter_40000.pth` |
+| A-20 | FFN-only | `MixFFN.layers[0]` | 0.20 | 10000 | baseline | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | `checkpoints/...` |
+| A-30 | FFN-only | `MixFFN.layers[0]` | 0.30 | 10000 | baseline | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | `checkpoints/...` |
+| B-10 | MSA-only | `attn.qkv/proj` | 0.10 | 10000 | baseline | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | `checkpoints/...` |
+| B-20 | MSA-only | `attn.qkv/proj` | 0.20 | 10000 | baseline | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | `checkpoints/...` |
+| C-20 | FFN+MSA | 两者组合 | 0.20 | 15000 | baseline | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 | `checkpoints/...` |
+
+### B. 单次实验记录卡（复制此模板）
+
+#### [ExpID: 例如 A-20]
+
+- **日期：**
+- **负责人：**
+- **目标：**（例：验证 FFN 20% 剪枝后精度恢复能力）
+
+##### 1) 配置与输入
+
+- **配置文件：** `configs/railsem19/segformer_b0_rs19_512x512_40000it.py`
+- **基线权重：** `runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth`
+- **剪枝脚本：** `src/global_prune.py` / `src/prune_test.py` / 其他
+- **剪枝对象：**
+- **剪枝比例：**
+- **重要性准则：**（L1 / MagnitudeImportance / 其他）
+- **随机种子：**
+
+##### 2) 剪枝后结构检查
+
+- **目标层数：**
+- **关键层变化（至少 2~4 个）：**
+    - `stage1`: `Conv2d(32, 128, ...) -> Conv2d(32, xx, ...)`
+    - `stage2`: `Conv2d(64, 256, ...) -> Conv2d(64, xx, ...)`
+- **前向检查：**（通过/失败）
+- **异常信息：**（若失败则贴报错）
+- **剪枝模型保存路径：**
+
+##### 3) 微调设置
+
+- **微调迭代数：**（5000 / 10000 / 20000）
+- **学习率：**
+- **batch size：**
+- **work_dir：**
+- **best ckpt：**
+
+##### 4) 评测结果（统一口径）
+
+- **mIoU(%)：**
+- **Params(M)：**
+- **FLOPs(G)：**
+- **Latency(ms)：**（注明 device、batch、warmup 次数）
+- **FPS：**
+
+##### 5) 对比与结论
+
+- **相对 baseline 精度变化：** $\Delta mIoU = mIoU_{pruned} - mIoU_{baseline}$
+- **压缩率：** $Compression = 1 - \frac{Params_{pruned}}{Params_{baseline}}$
+- **速度提升：** $Speedup = \frac{Latency_{baseline}}{Latency_{pruned}}$
+- **结论：**（Go / Conditional / No-Go）
+- **下一步动作：**
+
+### C. 阶段门决策表（Go / No-Go）
+
+| 阶段 | 通过条件 | 当前状态 | 备注 |
+|---|---|---|---|
+| 阶段 1（10%~20%） | 前向稳定 + mIoU 可恢复 + 速度有提升 | 待评估 | |
+| 阶段 2（30%~50%） | A/B/C 至少 1 条线达到较优平衡 | 待评估 | |
+| 部署前验收 | 目标设备接近或达到 30 FPS | 待评估 | Jetson Orin NX |
+
+### D. 常见失败快速排查（剪枝专用）
+
+- **前向失败：**优先检查依赖图输入尺寸、被剪枝层索引是否越界、分组卷积 `groups` 是否同步更新。
+- **精度大跌：**降低剪枝比例，先只剪 FFN，再增加微调迭代；必要时分阶段剪枝（先 10%，再 10%）。
+- **checkpoint 不兼容：**确保剪枝后权重与当前模型结构一致，不要直接加载未剪枝结构权重。
+- **速度提升不明显：**确认真实部署链路（推理框架/后端）是否已利用结构化稀疏带来的算子加速。

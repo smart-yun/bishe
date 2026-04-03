@@ -1,4 +1,4 @@
-name: railseg2
+name: railseg
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
   - conda-forge
@@ -114,9 +114,6 @@ dependencies:
       - opencv-python==4.13.0.92
       - prettytable==3.17.0
       - six==1.17.0
-      - torch==2.4.1+cu124
-      - torchaudio==2.4.1+cu124
-      - torchvision==0.19.1+cu124
       - triton==3.0.0
       - wcwidth==0.6.0
-prefix: /home/lcy/miniconda3/envs/railseg2
+
