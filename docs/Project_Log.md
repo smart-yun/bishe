@@ -35,6 +35,15 @@ git push //推送github
 
 
 
+每次拉取流程
+git status  #查看当前状态
+git pull --rebase origin main
+
+
+git stash#先临时藏起来
+git pull --rebase origin main
+git stash pop
+
 明日计划
 
 
