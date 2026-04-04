@@ -26,7 +26,7 @@ runs/
 
 # ===== Training artifacts (建议不提交) =====
 checkpoints/
-exports/
+#exports/ #提交exports
 # 如果 results 里只有表格/图片（小文件）想提交，就注释掉下一行
 # results/
 
