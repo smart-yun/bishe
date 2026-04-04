@@ -347,6 +347,21 @@ git push
 - `num_val_points`: 80
 - `critical_found`: false
 
+### 2.1) 复杂度与推理速度（best@79k）
+
+- 指标文件：`exports/metrics_80k_best_79000.json`
+- 配置：`configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py`
+- 权重：`runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth`
+- 设备：`cuda:0`（输入尺寸 `512x512`）
+
+| 指标 | 数值 |
+|---|---:|
+| Params (M) | 3.720051 |
+| FLOPs (G) | 7.956135936 |
+| Latency mean (ms) | 9.4368 |
+| FPS mean | 105.968 |
+| warmup / timed iters | 5 / 195 |
+
 ### 3) 结论
 
 - 与 40k 基线（约 57.16）相比，80k 训练带来明显收益（约 +2.59 mIoU）。

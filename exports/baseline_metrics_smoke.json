@@ -1,0 +1,25 @@
+{
+  "config": "/home/lcy/Projects/bishe/configs/railsem19/segformer_b0_rs19_512x512_40000it.py",
+  "checkpoint": "/home/lcy/Projects/bishe/runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth",
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "complexity": {
+    "flops": 7956135936.0,
+    "params": 3720051.0,
+    "flops_g": 7.956135936,
+    "params_m": 3.720051
+  },
+  "latency": {
+    "latency_ms_mean": 36.945814933339236,
+    "latency_ms_std": 0.0,
+    "fps_mean": 27.066665109547174,
+    "fps_std": 0.0,
+    "repeat_times": 1,
+    "warmup": 5,
+    "total_iters": 20,
+    "timed_iters": 15
+  }
+}

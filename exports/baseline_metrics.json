@@ -1,0 +1,30 @@
+{
+  "config": "configs/railsem19/segformer_b0_rs19_512x512_40000it.py",
+  "checkpoint": "runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth",
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "miou_metrics": {
+    "aAcc": 85.3,
+    "mIoU": 57.17,
+    "mAcc": 70.08
+  },
+  "complexity": {
+    "flops": 7956135936.0,
+    "params": 3720051.0,
+    "flops_g": 7.956135936,
+    "params_m": 3.720051
+  },
+  "latency": {
+    "latency_ms_mean": 35.81156875383945,
+    "latency_ms_std": 0.0,
+    "fps_mean": 27.923937286125938,
+    "fps_std": 0.0,
+    "repeat_times": 1,
+    "warmup": 5,
+    "total_iters": 200,
+    "timed_iters": 195
+  }
+}
