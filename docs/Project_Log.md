@@ -329,6 +329,32 @@ git push
 
 ---
 
+## 2026-04-04 训练曲线留痕（80k）
+
+### 1) 产出文件
+
+- 曲线图：`results/curves/miou_curve_80k.png`
+- 摘要：`results/curves/miou_curve_80k_summary.json`
+- 日志源：`runs/rs19/segformer_b0_512x512_80000it_server/20260404_021343/vis_data/20260404_021343.json`
+
+### 2) 关键结果（自动汇总）
+
+- `best_step`: 79000
+- `best_miou`: **59.75**
+- `last_step`: 80000
+- `last_miou`: **59.54**
+- `miou_drop_after_best`: 0.21
+- `num_val_points`: 80
+- `critical_found`: false
+
+### 3) 结论
+
+- 与 40k 基线（约 57.16）相比，80k 训练带来明显收益（约 +2.59 mIoU）。
+- 最佳点出现在 79k，末尾仅轻微回落（0.21），当前无明显过拟合报警。
+- 建议后续评测与汇报优先使用 `best_mIoU_iter_79000.pth`。
+
+---
+
 ## 2026-04-03 剪枝实验矩阵模板（可直接填写）
 
 > 适用范围：SegFormer-B0（RailSem19，输入 512x512）
