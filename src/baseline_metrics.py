@@ -13,7 +13,6 @@ python src/baseline_metrics.py \
   --checkpoint runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth \
   --device cuda:0
 
-¸Ächeckpoint¼´¿É!
 """
 
 from __future__ import annotations
