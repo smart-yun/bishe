@@ -18,6 +18,10 @@ DRY_RUN="${DRY_RUN:-0}"
 RESUME_CKPT="${RESUME_CKPT:-}"
 LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-}"
 
+# Optional: load weights only (recommended for 40k -> 80k extension)
+# e.g. LOAD_CKPT="runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth" ./scripts/server_train_80k.sh
+LOAD_CKPT="${LOAD_CKPT:-}"
+
 if [[ ! -d "$PROJECT_ROOT" ]]; then
 	echo "[ERR] PROJECT_ROOT not found: $PROJECT_ROOT"
 	echo "[TIP] set PROJECT_ROOT explicitly, e.g. PROJECT_ROOT=$PWD ./scripts/server_train_80k.sh"
@@ -41,6 +45,16 @@ if [[ -n "$RESUME_CKPT" && ! -f "$RESUME_CKPT" ]]; then
 	exit 1
 fi
 
+if [[ -n "$LOAD_CKPT" && ! -f "$LOAD_CKPT" ]]; then
+	echo "[ERR] LOAD_CKPT not found: $LOAD_CKPT"
+	exit 1
+fi
+
+if [[ -n "$RESUME_CKPT" && -n "$LOAD_CKPT" ]]; then
+	echo "[ERR] set only one of RESUME_CKPT or LOAD_CKPT"
+	exit 1
+fi
+
 # Activate conda env
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$CONDA_ENV_NAME"
@@ -60,6 +74,9 @@ echo "[INFO] DRY_RUN=$DRY_RUN"
 if [[ -n "$RESUME_CKPT" ]]; then
 	echo "[INFO] RESUME_CKPT=$RESUME_CKPT"
 fi
+if [[ -n "$LOAD_CKPT" ]]; then
+	echo "[INFO] LOAD_CKPT=$LOAD_CKPT"
+fi
 
 if [[ "$DRY_RUN" == "1" ]]; then
 	echo "[OK] dry-run checks passed"
@@ -70,6 +87,8 @@ fi
 # Single-GPU launch
 if [[ -n "$RESUME_CKPT" ]]; then
 	nohup python src/train_mmseg.py "$CONFIG_PATH" --work-dir "$WORK_DIR" --resume-from "$RESUME_CKPT" > "$LOG_FILE" 2>&1 &
+elif [[ -n "$LOAD_CKPT" ]]; then
+	nohup python src/train_mmseg.py "$CONFIG_PATH" --work-dir "$WORK_DIR" --load-from "$LOAD_CKPT" > "$LOG_FILE" 2>&1 &
 else
 	nohup python src/train_mmseg.py "$CONFIG_PATH" --work-dir "$WORK_DIR" > "$LOG_FILE" 2>&1 &
 fi
