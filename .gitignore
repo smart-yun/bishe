@@ -61,7 +61,7 @@ data/**/jsons/
 # large outputs
 results/vis_check/
 checkpoints/
-runs/
+#runs/   #提交运行结果，避免mcp
 
 # third-party/vendor and build artifacts
 mmsegmentation-main/
