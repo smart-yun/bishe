@@ -31,3 +31,7 @@ visualizer = dict(
 )
 
 work_dir = 'runs/rs19/segformer_b0_512x512_80000it_server'
+
+# Continue from 40k weights only (do not resume optimizer/scheduler state)
+load_from = 'runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth'
+resume = False

@@ -10,9 +10,13 @@ CONFIG_PATH="${CONFIG_PATH:-configs/railsem19/segformer_b0_rs19_512x512_80000it_
 WORK_DIR="${WORK_DIR:-runs/rs19/segformer_b0_512x512_80000it_server}"
 DRY_RUN="${DRY_RUN:-0}"
 
-# Optional: resume from checkpoint
-# e.g. RESUME_CKPT="runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth" ./scripts/server_train_80k.sh
+# Optional checkpoints
+# Strict resume (恢复优化器/调度器状态):
+#   RESUME_CKPT="runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth" ./scripts/server_train_80k.sh
+# Weights-only load (推荐用于 40k -> 80k 继续训练，避免 lr=0):
+#   LOAD_FROM_CKPT="runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth" ./scripts/server_train_80k.sh
 RESUME_CKPT="${RESUME_CKPT:-}"
+LOAD_FROM_CKPT="${LOAD_FROM_CKPT:-}"
 
 if [[ ! -d "$PROJECT_ROOT" ]]; then
 	echo "[ERR] PROJECT_ROOT not found: $PROJECT_ROOT"

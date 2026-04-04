@@ -10,7 +10,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('config', help='Path to mmseg config (.py)')
     parser.add_argument('--work-dir', default=None, help='Override work_dir in config')
-    parser.add_argument('--resume-from', default=None, help='Resume training from checkpoint path')
+    parser.add_argument('--resume-from', default=None, help='Resume training from checkpoint path (恢复优化器/调度器状态)')
+    parser.add_argument('--load-from', default=None, help='Load model weights only (不恢复优化器/调度器状态)')
     args = parser.parse_args()
 
     # 关键：注册 mmseg 的所有模块（模型/数据集/评估器等）
@@ -21,11 +22,21 @@ def main():
     if args.work_dir is not None:
         cfg.work_dir = args.work_dir
 
+    if args.resume_from is not None and args.load_from is not None:
+        raise ValueError('--resume-from and --load-from cannot be used together')
+
     if args.resume_from is not None:
         ckpt_path = Path(args.resume_from)
         if not ckpt_path.exists():
             raise FileNotFoundError(f'Resume checkpoint not found: {ckpt_path}')
         cfg.resume = True
+        cfg.load_from = str(ckpt_path)
+
+    if args.load_from is not None:
+        ckpt_path = Path(args.load_from)
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f'Load checkpoint not found: {ckpt_path}')
+        cfg.resume = False
         cfg.load_from = str(ckpt_path)
 
     # 关键：避免分布式 launcher 相关默认值干扰
