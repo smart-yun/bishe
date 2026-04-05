@@ -18,9 +18,9 @@
     "params_m": 3.720051
   },
   "latency": {
-    "latency_ms_mean": 8.769670384599056,
+    "latency_ms_mean": 8.76862939484897,
     "latency_ms_std": 0.0,
-    "fps_mean": 114.02937124708357,
+    "fps_mean": 114.04290852883331,
     "fps_std": 0.0,
     "repeat_times": 1,
     "warmup": 5,

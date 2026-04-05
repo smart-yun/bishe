@@ -13,6 +13,20 @@ python src/baseline_metrics.py \
   --checkpoint runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth \
   --device cuda:0
 
+
+#baseline
+  python src/baseline_metrics.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py \
+  --checkpoint runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth \
+  --output exports/80000it_baseline_metrics.json\
+  --device cuda:0
+
+#prune_test
+    python src/baseline_metrics.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py \
+  --checkpoint checkpoints/pruned_test_model_80000it_79000best.pth \
+  --output exports/80000it_prune_test_metrics.json\
+  --device cuda:0
 """
 
 from __future__ import annotations
