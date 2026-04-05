@@ -30,9 +30,9 @@ def get_model_from_config(config_path, checkpoint_path):
 
 def main():
     # --- 1. 配置 ---
-    config_path = 'configs/railsem19/segformer_b0_rs19_512x512_40000it.py'
+    config_path = 'configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py'
     # 请将 'path/to/your/best_baseline_checkpoint.pth' 替换为你的基线模型权重路径
-    checkpoint_path = 'runs/rs19/segformer_b0_512x512_40000it/best_mIoU_iter_40000.pth' # 示例路径，请务必修改
+    checkpoint_path = 'runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth' # 示例路径，请务必修改
     
     print(f"from  config  '{config_path}' load model...")
     model, cfg = get_model_from_config(config_path, checkpoint_path)
@@ -108,7 +108,7 @@ def main():
         print(f"Forward failed!: {e}")
 
     # --- 7. 保存试剪后的模型 ---
-    pruned_checkpoint_path = 'checkpoints/pruned_test_model.pth'
+    pruned_checkpoint_path = 'checkpoints/pruned_test_model_80000it_79000best.pth'
     os.makedirs(os.path.dirname(pruned_checkpoint_path), exist_ok=True)
     torch.save(model.state_dict(), pruned_checkpoint_path)
     print(f"\nthe model been cut is saved to: {pruned_checkpoint_path}")
