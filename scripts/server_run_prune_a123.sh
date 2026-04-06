@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+
+'''
+conda run -n railseg python /root/bishe/src/global_prune.py --config configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py --checkpoint runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth --pruning-ratio 0.1 --target-stages 3 4 --max-target-layers 0 --shape 512 512 --device cuda:0 --pruned-checkpoint /root/bishe/checkpoints/A3_stage34_ffn_r10_ft10k_pruned.pth --output-json /root/bishe/exports/A3_stage34_ffn_r10_ft10k.json --enable-finetune --finetune-iters 10000 --finetune-lr 1e-05 --finetune-weight-decay 0.01 --finetune-eval-interval 200 --finetune-log-interval 50 --finetune-save-best /root/bishe/checkpoints/A3_stage34_ffn_r10_ft10k_best.pth --finetune-save-last /root/bishe/checkpoints/A3_stage34_ffn_r10_ft10k_last.pth --skip-latency
+'''
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
