@@ -1,0 +1,394 @@
+{
+  "config": "configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py",
+  "checkpoint": "runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth",
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "totals": {
+    "params": 3720051,
+    "params_m": 3.720051,
+    "flops": 12786860032.0,
+    "flops_g": 12.786860032,
+    "flops_note": "Approximate FLOPs from Conv2d/Linear hooks + estimated MHA cost"
+  },
+  "modules": [
+    {
+      "core_module": "decode_head.fusion",
+      "params": 262656,
+      "params_m": 0.262656,
+      "params_share_pct": 7.060548363449856,
+      "flops": 8589934592.0,
+      "flops_g": 8.589934592,
+      "flops_share_pct": 67.17782606912952,
+      "priority_score": 0.36112545991416306,
+      "example_layers": [
+        "decode_head.fusion_conv.bn",
+        "decode_head.fusion_conv.conv"
+      ],
+      "recommendation": "MEDIUM priority: useful but usually below backbone impact.",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage4.ffn",
+      "params": 1071616,
+      "params_m": 1.071616,
+      "params_share_pct": 28.806486792788593,
+      "flops": 546308096.0,
+      "flops_g": 0.546308096,
+      "flops_share_pct": 4.272417893312559,
+      "priority_score": 0.1914093612259597,
+      "example_layers": [
+        "backbone.layers.3.1.0.ffn.layers.0",
+        "backbone.layers.3.1.0.ffn.layers.1",
+        "backbone.layers.3.1.0.ffn.layers.4"
+      ],
+      "recommendation": "HIGH priority: prune 1x1 channels first (L1 / importance score).",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage3.ffn",
+      "params": 424000,
+      "params_m": 0.424,
+      "params_share_pct": 11.397693203668444,
+      "flops": 862453760.0,
+      "flops_g": 0.86245376,
+      "flops_share_pct": 6.744843987043339,
+      "priority_score": 0.11048282668155796,
+      "example_layers": [
+        "backbone.layers.2.1.0.ffn.layers.0",
+        "backbone.layers.2.1.0.ffn.layers.1",
+        "backbone.layers.2.1.0.ffn.layers.4"
+      ],
+      "recommendation": "HIGH priority: prune 1x1 channels first (L1 / importance score).",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage4.attn",
+      "params": 526336,
+      "params_m": 0.526336,
+      "params_share_pct": 14.148623231240649,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 0.07003568499464122,
+      "example_layers": [
+        "backbone.layers.3.1.0.attn.attn",
+        "backbone.layers.3.1.0.attn.attn.out_proj",
+        "backbone.layers.3.1.1.attn.attn"
+      ],
+      "recommendation": "MED-HIGH priority: prune qkv/proj with head-dim checks.",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage3.attn",
+      "params": 411840,
+      "params_m": 0.41184,
+      "params_share_pct": 11.07081596461984,
+      "flops": 104857600.0,
+      "flops_g": 0.1048576,
+      "flops_share_pct": 0.8200418221329288,
+      "priority_score": 0.05976179204877243,
+      "example_layers": [
+        "backbone.layers.2.1.0.attn.attn",
+        "backbone.layers.2.1.0.attn.attn.out_proj",
+        "backbone.layers.2.1.0.attn.sr"
+      ],
+      "recommendation": "MED-HIGH priority: prune qkv/proj with head-dim checks.",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage4.patch_embed",
+      "params": 369408,
+      "params_m": 0.369408,
+      "params_share_pct": 9.930186440992342,
+      "flops": 188743680.0,
+      "flops_g": 0.18874368,
+      "flops_share_pct": 1.4760752798392718,
+      "priority_score": 0.050164040372402456,
+      "example_layers": [
+        "backbone.layers.3.0.norm",
+        "backbone.layers.3.0.projection"
+      ],
+      "recommendation": "MEDIUM priority: use small pruning ratios.",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage2.ffn",
+      "params": 71296,
+      "params_m": 0.071296,
+      "params_share_pct": 1.9165328647376072,
+      "flops": 574619648.0,
+      "flops_g": 0.574619648,
+      "flops_share_pct": 4.493829185288449,
+      "priority_score": 0.04167557301300713,
+      "example_layers": [
+        "backbone.layers.1.1.0.ffn.layers.0",
+        "backbone.layers.1.1.0.ffn.layers.1",
+        "backbone.layers.1.1.0.ffn.layers.4"
+      ],
+      "recommendation": "HIGH priority: prune 1x1 channels first (L1 / importance score).",
+      "priority_level": "HIGH"
+    },
+    {
+      "core_module": "backbone.stage1.ffn",
+      "params": 19264,
+      "params_m": 0.019264,
+      "params_share_pct": 0.5178423629138418,
+      "flops": 612368384.0,
+      "flops_g": 0.612368384,
+      "flops_share_pct": 4.7890442412563035,
+      "priority_score": 0.035837542450027446,
+      "example_layers": [
+        "backbone.layers.0.1.0.ffn.layers.0",
+        "backbone.layers.0.1.0.ffn.layers.1",
+        "backbone.layers.0.1.0.ffn.layers.4"
+      ],
+      "recommendation": "HIGH priority: prune 1x1 channels first (L1 / importance score).",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "decode_head.proj",
+      "params": 133120,
+      "params_m": 0.13312,
+      "params_share_pct": 3.578445564321565,
+      "flops": 520093696.0,
+      "flops_g": 0.520093696,
+      "flops_share_pct": 4.067407437779327,
+      "priority_score": 0.03462637135251,
+      "example_layers": [
+        "decode_head.convs.0.bn",
+        "decode_head.convs.0.conv",
+        "decode_head.convs.1.conv"
+      ],
+      "recommendation": "MEDIUM priority: useful but usually below backbone impact.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage2.attn",
+      "params": 164736,
+      "params_m": 0.164736,
+      "params_share_pct": 4.428326385847936,
+      "flops": 67108864.0,
+      "flops_g": 0.067108864,
+      "flops_share_pct": 0.5248267661650744,
+      "priority_score": 0.025095417545245986,
+      "example_layers": [
+        "backbone.layers.1.1.0.attn.attn",
+        "backbone.layers.1.1.0.attn.attn.out_proj",
+        "backbone.layers.1.1.0.attn.sr"
+      ],
+      "recommendation": "MED-HIGH priority: prune qkv/proj with head-dim checks.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage1.attn",
+      "params": 139712,
+      "params_m": 0.139712,
+      "params_share_pct": 3.7556474360163343,
+      "flops": 67108864.0,
+      "flops_g": 0.067108864,
+      "flops_share_pct": 0.5248267661650744,
+      "priority_score": 0.021765656743579557,
+      "example_layers": [
+        "backbone.layers.0.1.0.attn.attn",
+        "backbone.layers.0.1.0.attn.attn.out_proj",
+        "backbone.layers.0.1.0.attn.sr"
+      ],
+      "recommendation": "MED-HIGH priority: prune qkv/proj with head-dim checks.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage3.patch_embed",
+      "params": 92640,
+      "params_m": 0.09264,
+      "params_share_pct": 2.4902884395939733,
+      "flops": 188743680.0,
+      "flops_g": 0.18874368,
+      "flops_share_pct": 1.4760752798392718,
+      "priority_score": 0.01835847641642443,
+      "example_layers": [
+        "backbone.layers.2.0.norm",
+        "backbone.layers.2.0.projection"
+      ],
+      "recommendation": "MEDIUM priority: use small pruning ratios.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage2.patch_embed",
+      "params": 18624,
+      "params_m": 0.018624,
+      "params_share_pct": 0.5006382977007573,
+      "flops": 150994944.0,
+      "flops_g": 0.150994944,
+      "flops_share_pct": 1.1808602238714174,
+      "priority_score": 0.008310223392398895,
+      "example_layers": [
+        "backbone.layers.1.0.norm",
+        "backbone.layers.1.0.projection"
+      ],
+      "recommendation": "MEDIUM priority: use small pruning ratios.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage1.patch_embed",
+      "params": 4800,
+      "params_m": 0.0048,
+      "params_share_pct": 0.12903048909813333,
+      "flops": 154140672.0,
+      "flops_g": 0.154140672,
+      "flops_share_pct": 1.2054614785354052,
+      "priority_score": 0.006850141566242013,
+      "example_layers": [
+        "backbone.layers.0.0.norm",
+        "backbone.layers.0.0.projection"
+      ],
+      "recommendation": "MEDIUM priority: use small pruning ratios.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "decode_head.other",
+      "params": 4883,
+      "params_m": 0.004883,
+      "params_share_pct": 0.1312616413054552,
+      "flops": 159383552.0,
+      "flops_g": 0.159383552,
+      "flops_share_pct": 1.2464635696420516,
+      "priority_score": 0.00670160431701525,
+      "example_layers": [
+        "decode_head.conv_seg"
+      ],
+      "recommendation": "MEDIUM priority: useful but usually below backbone impact.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage4.other",
+      "params": 2048,
+      "params_m": 0.002048,
+      "params_share_pct": 0.05505300868187022,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 0.0001981908312547328,
+      "example_layers": [
+        "backbone.layers.3.1.0.norm1",
+        "backbone.layers.3.1.0.norm2",
+        "backbone.layers.3.1.1.norm1"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "MEDIUM"
+    },
+    {
+      "core_module": "backbone.stage3.other",
+      "params": 1280,
+      "params_m": 0.00128,
+      "params_share_pct": 0.034408130426168894,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 0.00012386926953420805,
+      "example_layers": [
+        "backbone.layers.2.1.0.norm1",
+        "backbone.layers.2.1.0.norm2",
+        "backbone.layers.2.1.1.norm1"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage2.other",
+      "params": 512,
+      "params_m": 0.000512,
+      "params_share_pct": 0.013763252170467555,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 4.95477078136832e-05,
+      "example_layers": [
+        "backbone.layers.1.1.0.norm1",
+        "backbone.layers.1.1.0.norm2",
+        "backbone.layers.1.1.1.norm1"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage4.norm",
+      "params": 512,
+      "params_m": 0.000512,
+      "params_share_pct": 0.013763252170467555,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 4.95477078136832e-05,
+      "example_layers": [
+        "backbone.layers.3.2"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage3.norm",
+      "params": 320,
+      "params_m": 0.00032,
+      "params_share_pct": 0.008602032606542223,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 3.096731738355201e-05,
+      "example_layers": [
+        "backbone.layers.2.2"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage1.other",
+      "params": 256,
+      "params_m": 0.000256,
+      "params_share_pct": 0.0068816260852337776,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 2.47738539068416e-05,
+      "example_layers": [
+        "backbone.layers.0.1.0.norm1",
+        "backbone.layers.0.1.0.norm2",
+        "backbone.layers.0.1.1.norm1"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage2.norm",
+      "params": 128,
+      "params_m": 0.000128,
+      "params_share_pct": 0.0034408130426168888,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 1.23869269534208e-05,
+      "example_layers": [
+        "backbone.layers.1.2"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    },
+    {
+      "core_module": "backbone.stage1.norm",
+      "params": 64,
+      "params_m": 6.4e-05,
+      "params_share_pct": 0.0017204065213084444,
+      "flops": 0.0,
+      "flops_g": 0.0,
+      "flops_share_pct": 0.0,
+      "priority_score": 6.1934634767104e-06,
+      "example_layers": [
+        "backbone.layers.0.2"
+      ],
+      "recommendation": "LOW priority: prune after hotspot modules.",
+      "priority_level": "LOW"
+    }
+  ]
+}
