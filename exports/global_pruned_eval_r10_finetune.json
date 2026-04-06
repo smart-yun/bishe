@@ -1,0 +1,66 @@
+{
+  "config": "configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py",
+  "baseline_checkpoint": "runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth",
+  "pruned_checkpoint": "checkpoints/globally_pruned_ffn.pth",
+  "pruning_ratio": 0.1,
+  "target_stages": [
+    1,
+    2,
+    3
+  ],
+  "max_target_layers": 4,
+  "prune_scope": "segformer_mixffn_layers0_conv",
+  "prune_meta": {
+    "target_layer_count": 4,
+    "total_candidate_channels": 1792,
+    "global_budget_channels": 179,
+    "applied_layer_count": 2,
+    "applied_channel_count": 179
+  },
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "finetune_enabled": true,
+  "post_prune_eval": {
+    "miou_metrics": {
+      "aAcc": 84.59,
+      "mIoU": 56.0,
+      "mAcc": 68.86
+    },
+    "complexity": {
+      "flops": 7855689728.0,
+      "params": 3695170.0,
+      "flops_g": 7.855689728,
+      "params_m": 3.69517
+    }
+  },
+  "finetune": {
+    "enabled": true,
+    "iters": 1000,
+    "lr": 1e-05,
+    "weight_decay": 0.01,
+    "eval_interval": 200,
+    "log_interval": 50,
+    "loss_mean": 88.14984672927856,
+    "loss_last": 91.99441528320312,
+    "best_miou_during_ft": 57.82,
+    "best_iter": 1000,
+    "best_ckpt": "checkpoints/global_pruned_r10_finetune_best.pth",
+    "last_ckpt": "checkpoints/global_pruned_r10_finetune_last.pth"
+  },
+  "post_finetune_eval": {
+    "miou_metrics": {
+      "aAcc": 85.57,
+      "mIoU": 57.82,
+      "mAcc": 70.36
+    },
+    "complexity": {
+      "flops": 7855689728.0,
+      "params": 3695170.0,
+      "flops_g": 7.855689728,
+      "params_m": 3.69517
+    }
+  }
+}

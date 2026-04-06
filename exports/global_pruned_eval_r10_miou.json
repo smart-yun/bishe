@@ -1,0 +1,39 @@
+{
+  "config": "configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py",
+  "baseline_checkpoint": "runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth",
+  "pruned_checkpoint": "checkpoints/globally_pruned_ffn.pth",
+  "pruning_ratio": 0.1,
+  "target_stages": [
+    1,
+    2,
+    3
+  ],
+  "max_target_layers": 4,
+  "prune_scope": "segformer_mixffn_layers0_conv",
+  "prune_meta": {
+    "target_layer_count": 4,
+    "total_candidate_channels": 1792,
+    "global_budget_channels": 179,
+    "applied_layer_count": 2,
+    "applied_channel_count": 179
+  },
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "finetune_enabled": false,
+  "post_prune_eval": {
+    "miou_metrics": {
+      "aAcc": 84.59,
+      "mIoU": 56.0,
+      "mAcc": 68.86
+    },
+    "complexity": {
+      "flops": 7855689728.0,
+      "params": 3695170.0,
+      "flops_g": 7.855689728,
+      "params_m": 3.69517
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-æœ€å°æ”¹åŠ¨ç‰ˆï¼šåœ¨ç»“æ„åŒ–å‰ªæåï¼Œç›´æ¥åŸºäºâ€œå‰ªæåçš„å†…å­˜æ¨¡å‹â€è¾“å‡ºçœŸå®è¯„ä¼°ç»“æœã€‚
-è¾“å‡º JSON åŒ…å«ï¼šmIoU / Params / FLOPsï¼ˆå¯é€‰ latencyï¼‰ã€‚
+×îĞ¡¸Ä¶¯°æ£ºÔÚ½á¹¹»¯¼ôÖ¦ºó£¬Ö±½Ó»ùÓÚ¡°¼ôÖ¦ºóµÄÄÚ´æÄ£ĞÍ¡±Êä³öÕæÊµÆÀ¹À½á¹û¡£
+Êä³ö JSON °üº¬£ºmIoU / Params / FLOPs£¨¿ÉÑ¡ latency£©¡£
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ def get_model_from_config(config_path: str, checkpoint_path: str):
 
 
 def eval_miou_with_pruned_model(cfg: Config, model: torch.nn.Module, work_dir: str) -> Dict[str, float]:
-    """å…³é”®ç‚¹ï¼šå¤ç”¨ cfg çš„ dataloader/evaluatorï¼Œä½†æ¨¡å‹ä½¿ç”¨â€œå‰ªæåå†…å­˜æ¨¡å‹â€ã€‚"""
+    """¹Ø¼üµã£º¸´ÓÃ cfg µÄ dataloader/evaluator£¬µ«Ä£ĞÍÊ¹ÓÃ¡°¼ôÖ¦ºóÄÚ´æÄ£ĞÍ¡±¡£"""
     cfg_eval = copy.deepcopy(cfg)
     cfg_eval.launcher = 'none'
     cfg_eval.work_dir = work_dir
@@ -73,7 +73,7 @@ def eval_miou_with_pruned_model(cfg: Config, model: torch.nn.Module, work_dir: s
         name='visualizer')
 
     runner = Runner.from_cfg(cfg_eval)
-    # ç”¨å‰ªæåæ¨¡å‹è¦†ç›– runner å†…éƒ¨æ¨¡å‹ï¼Œé¿å…â€œé‡å»ºåŸç»“æ„ + åŠ è½½ä¸åŒ¹é…æƒé‡â€
+    # ÓÃ¼ôÖ¦ºóÄ£ĞÍ¸²¸Ç runner ÄÚ²¿Ä£ĞÍ£¬±ÜÃâ¡°ÖØ½¨Ô­½á¹¹ + ¼ÓÔØ²»Æ¥ÅäÈ¨ÖØ¡±
     runner.model = model
 
     metrics = runner.test()
@@ -194,7 +194,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument('--work-dir', default='runs/rs19/prune_eval_script')
     parser.add_argument('--pruned-checkpoint', default='checkpoints/pruned_test_model_80000it_79000best.pth')
-    parser.add_argument('--output-json', default='exports/80000it_prune_test_metrics.json')
+    parser.add_argument('--output-json', default='exports/pruned_eval.json')
 
     parser.add_argument('--warmup', type=int, default=5)
     parser.add_argument('--iters', type=int, default=200)
@@ -219,7 +219,7 @@ def main() -> None:
     print(f"[load] config={args.config}")
     model, cfg = get_model_from_config(args.config, args.checkpoint)
 
-    # 1) æ„å»ºä¾èµ–å›¾å¹¶å‰ªæ
+    # 1) ¹¹½¨ÒÀÀµÍ¼²¢¼ôÖ¦
     print('[prune] build dependency graph...')
     dg = tp.DependencyGraph()
     dg.build_dependency(model, example_inputs=torch.randn(1, 3, args.shape[0], args.shape[1]))
@@ -237,18 +237,18 @@ def main() -> None:
     else:
         group.prune()
 
-    # 2) å¿«é€Ÿå‰å‘éªŒè¯
+    # 2) ¿ìËÙÇ°ÏòÑéÖ¤
     print('[check] forward smoke test...')
     with torch.no_grad():
         x = torch.randn(1, 3, args.shape[0], args.shape[1])
         _ = model(x)
 
-    # 3) ä¿å­˜å‰ªææ¨¡å‹æƒé‡ï¼ˆstate_dictï¼‰
+    # 3) ±£´æ¼ôÖ¦Ä£ĞÍÈ¨ÖØ£¨state_dict£©
     os.makedirs(os.path.dirname(args.pruned_checkpoint), exist_ok=True)
     torch.save(model.state_dict(), args.pruned_checkpoint)
     print(f"[save] pruned checkpoint: {args.pruned_checkpoint}")
 
-    # 4) ç›´æ¥å¯¹å‰ªæåæ¨¡å‹è¯„ä¼°ï¼ˆçœŸå®é“¾è·¯ï¼‰
+    # 4) Ö±½Ó¶Ô¼ôÖ¦ºóÄ£ĞÍÆÀ¹À£¨ÕæÊµÁ´Â·£©
     result: Dict[str, Any] = {
         'config': args.config,
         'baseline_checkpoint': args.checkpoint,
