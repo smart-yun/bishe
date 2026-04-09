@@ -1,0 +1,12 @@
+{
+  "overfit_found": true,
+  "overfit_step": 10200,
+  "overfit_miou_drop": 0.6600000000000037,
+  "overfit_loss_drop": 0.05362147092819214,
+  "num_val_points": 50,
+  "first_step": 1700,
+  "num_epoch_points": 50,
+  "first_epoch": 1,
+  "critical_found": false,
+  "critical_step": null
+}
