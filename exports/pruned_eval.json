@@ -1,0 +1,49 @@
+{
+  "config": "configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py",
+  "baseline_checkpoint": "runs/rs19/segformer_b0_512x512_150ep_rtx4090/best_mIoU_iter_113900.pth",
+  "pruned_checkpoint": "/root/bishe/checkpoints/globally_pruned_ffn.pth",
+  "pruning_ratio": 0.3,
+  "target_stages": [
+    1,
+    2,
+    3
+  ],
+  "max_target_layers": 4,
+  "prune_scope": "segformer_mixffn_layers0_conv",
+  "prune_meta": {
+    "target_layer_count": 4,
+    "total_candidate_channels": 768,
+    "global_budget_channels": 230,
+    "applied_layer_count": 4,
+    "applied_channel_count": 230
+  },
+  "device": "cuda:0",
+  "shape": [
+    512,
+    512
+  ],
+  "finetune_enabled": false,
+  "post_prune_eval": {
+    "miou_metrics": {
+      "aAcc": 49.08,
+      "mIoU": 15.53,
+      "mAcc": 25.37
+    },
+    "complexity": {
+      "flops": 7695650816.0,
+      "params": 3701329.0,
+      "flops_g": 7.695650816,
+      "params_m": 3.701329
+    },
+    "latency": {
+      "latency_ms_mean": 9.524523599995915,
+      "latency_ms_std": 0.0,
+      "fps_mean": 104.99212790027934,
+      "fps_std": 0.0,
+      "repeat_times": 1,
+      "warmup": 5,
+      "total_iters": 200,
+      "timed_iters": 195
+    }
+  }
+}

@@ -55,6 +55,21 @@ options:
   --finetune-log-interval FINETUNE_LOG_INTERVAL
   --finetune-save-best FINETUNE_SAVE_BEST
   --finetune-save-last FINETUNE_SAVE_LAST
+
+
+
+python src/global_prune.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --checkpoint runs/rs19/segformer_b0_512x512_150ep_rtx4090/best_mIoU_iter_113900.pth \
+  --pruning-ratio 0.3 \
+  --shape 512 512 \
+  --device cuda:0 \
+  --work-dir runs/rs19/prune_eval \
+  --pruned-checkpoint checkpoints/globally_pruned_ffn.pth \
+  --output-json exports/pruned_eval.json
+
+  --enable-finetune --finetune-iters 3400 --finetune-lr 1e-5
+
 """
 
 from __future__ import annotations

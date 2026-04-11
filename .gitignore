@@ -21,7 +21,7 @@ dist/
 build/
 
 # ===== Logs / Runs =====
-# runs/
+runs/
 *.log
 
 # ===== Training artifacts (建议不提交) =====

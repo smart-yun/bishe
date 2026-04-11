@@ -32,6 +32,11 @@ visualizer = dict(
 
 work_dir = 'runs/rs19/segformer_b0_512x512_80000it_server'
 
-# Continue from 40k weights only (do not resume optimizer/scheduler state)
-load_from = 'runs/rs19/segformer_b0_512x512_40000it/iter_40000.pth'
+# Train from scratch: do not inherit checkpoint continuation from any parent config.
+load_from = None
 resume = False
+
+# Train from scratch: disable pretrained backbone initialization from mmseg base model.
+model = dict(
+    backbone=dict(init_cfg=None),
+)
