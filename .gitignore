@@ -25,10 +25,10 @@ runs/
 *.log
 
 # ===== Training artifacts (建议不提交) =====
-# checkpoints/
-#exports/ #提交exports
+checkpoints/
+exports/   #提交exports
 # 如果 results 里只有表格/图片（小文件）想提交，就注释掉下一行
-# results/
+results/
 
 # ===== Dataset (强烈不要提交) =====
 data/
@@ -59,9 +59,9 @@ data/**/uint8/
 data/**/jsons/
 
 # large outputs
-# results/vis_check/
-# checkpoints/
-#runs/   #提交运行结果
+results/vis_check/
+checkpoints/
+runs/   #提交运行结果
 
 # third-party/vendor and build artifacts
 mmsegmentation-main/
@@ -69,6 +69,6 @@ mmsegmentation-*.whl
 condaenv.*.requirements.txt
 
 # generated curve figures/summaries
-# results/curves/
-# results/miou_curve_critical.png
-# results/miou_curve_critical_summary.json
+results/curves/
+results/miou_curve_critical.png
+results/miou_curve_critical_summary.json
