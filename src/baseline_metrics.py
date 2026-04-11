@@ -16,8 +16,8 @@ python src/baseline_metrics.py \
 
 #baseline
   python src/baseline_metrics.py \
-  --config configs/railsem19/segformer_b0_rs19_512x512_80000it_server.py \
-  --checkpoint runs/rs19/segformer_b0_512x512_80000it_server/best_mIoU_iter_79000.pth \
+  --config configs/railsem19/segformer_b0_rs19_512x512_100ep_rtx4090_from_best.py \
+  --checkpoint runs/best_mIoU_iter_v1.pth \
   --output exports/80000it_baseline_metrics.json\
   --device cuda:0
 
@@ -43,6 +43,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import torch
+from torch import nn
 
 from mmengine.analysis import get_model_complexity_info
 from mmengine.config import Config
@@ -78,13 +79,6 @@ def build_eval_cfg(config_path: str, checkpoint_path: str, work_dir: str) -> Con
     return cfg
 
 
-def to_percent(value: float) -> float:
-    """Convert ratio [0,1] to percentage when needed."""
-    if 0.0 <= value <= 1.0:
-        return value * 100.0
-    return value
-
-
 def to_unit(value: float, unit: str) -> float:
     """Convert raw counts to M or G."""
     if unit == 'M':
@@ -94,9 +88,78 @@ def to_unit(value: float, unit: str) -> float:
     return value
 
 
+def _safe_torch_load(checkpoint_path: str) -> Any:
+    """Load checkpoint object while being compatible with PyTorch versions."""
+    try:
+        return torch.load(checkpoint_path, map_location='cpu', weights_only=False)
+    except TypeError:
+        # Older PyTorch versions may not support `weights_only`.
+        return torch.load(checkpoint_path, map_location='cpu')
+
+
+def _normalize_state_dict_keys(state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+    """Remove common distributed prefixes from state_dict keys."""
+    if not state_dict:
+        return state_dict
+
+    keys = list(state_dict.keys())
+    if all(k.startswith('module.') for k in keys):
+        return {k[len('module.'):]: v for k, v in state_dict.items()}
+    return state_dict
+
+
+def _extract_state_dict(checkpoint_obj: Any) -> Dict[str, torch.Tensor]:
+    """Extract a state_dict from different checkpoint object formats."""
+    if isinstance(checkpoint_obj, dict):
+        for key in ('state_dict', 'model', 'model_state_dict'):
+            maybe = checkpoint_obj.get(key)
+            if isinstance(maybe, dict):
+                return _normalize_state_dict_keys(maybe)
+
+        # Raw state_dict format: {param_name: tensor, ...}
+        if checkpoint_obj and all(isinstance(v, torch.Tensor) for v in checkpoint_obj.values()):
+            return _normalize_state_dict_keys(checkpoint_obj)
+
+    if isinstance(checkpoint_obj, nn.Module):
+        return _normalize_state_dict_keys(checkpoint_obj.state_dict())
+
+    if hasattr(checkpoint_obj, 'state_dict') and callable(checkpoint_obj.state_dict):
+        return _normalize_state_dict_keys(checkpoint_obj.state_dict())
+
+    raise TypeError(
+        f'Unsupported checkpoint object type: {type(checkpoint_obj)}. '
+        'Expected dict / state_dict / nn.Module.'
+    )
+
+
+def robust_load_model_checkpoint(model: nn.Module, checkpoint_path: str) -> None:
+    """Load checkpoint robustly for both normal and full-model serialized formats."""
+    try:
+        load_checkpoint(model, checkpoint_path, map_location='cpu')
+        return
+    except TypeError:
+        # Fallback for cases like torch.save(model), where mmengine expects dict-like obj.
+        pass
+
+    checkpoint_obj = _safe_torch_load(checkpoint_path)
+    state_dict = _extract_state_dict(checkpoint_obj)
+    missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
+    if missing_keys:
+        print(f'[WARN] Missing keys when loading checkpoint: {len(missing_keys)}')
+    if unexpected_keys:
+        print(f'[WARN] Unexpected keys when loading checkpoint: {len(unexpected_keys)}')
+
+
 def eval_miou(cfg: Config) -> Dict[str, float]:
     """Run full validation and return metric dict."""
-    runner = Runner.from_cfg(copy.deepcopy(cfg))
+    cfg_local = copy.deepcopy(cfg)
+    checkpoint_path = cfg_local.get('load_from', None)
+    cfg_local.load_from = None
+
+    runner = Runner.from_cfg(cfg_local)
+    if checkpoint_path:
+        robust_load_model_checkpoint(runner.model, checkpoint_path)
+
     metrics = runner.test()
 
     out: Dict[str, float] = {}
@@ -106,8 +169,8 @@ def eval_miou(cfg: Config) -> Dict[str, float]:
         except Exception:
             continue
 
-    if 'mIoU' in out:
-        out['mIoU'] = to_percent(out['mIoU'])
+    # NOTE: mmseg IoUMetric already reports mIoU in percentage (0~100).
+    # Keep the raw value to avoid accidental x100 amplification.
     return out
 
 
@@ -164,7 +227,7 @@ def build_benchmark_model_and_loader(cfg: Config, checkpoint_path: str, device: 
     data_loader = Runner.build_dataloader(cfg_local.test_dataloader)
 
     model = MODELS.build(cfg_local.model)
-    load_checkpoint(model, checkpoint_path, map_location='cpu')
+    robust_load_model_checkpoint(model, checkpoint_path)
 
     use_cuda = device.startswith('cuda') and torch.cuda.is_available()
     if use_cuda:
@@ -250,8 +313,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--skip-miou', action='store_true', help='Skip mIoU evaluation')
     parser.add_argument('--skip-flops', action='store_true', help='Skip FLOPs/Params')
     parser.add_argument('--skip-latency', action='store_true', help='Skip Latency/FPS benchmark')
+    parser.add_argument('--min-miou', type=float, default=None, help='Minimum acceptable mIoU (%) for baseline sanity check')
+    parser.add_argument('--strict-baseline-check', action='store_true', help='Exit with non-zero code if baseline mIoU < --min-miou')
 
-    parser.add_argument('--output-json', default='exports/baseline_metrics.json', help='Output JSON path')
+    parser.add_argument('--output-json', '--output', dest='output_json', default='exports/baseline_metrics.json', help='Output JSON path')
     return parser.parse_args()
 
 
@@ -289,6 +354,14 @@ def main() -> None:
         result['miou_metrics'] = miou_metrics
         if 'mIoU' in miou_metrics:
             print(f"  -> mIoU: {miou_metrics['mIoU']:.2f}%")
+            if args.min_miou is not None and miou_metrics['mIoU'] < float(args.min_miou):
+                msg = (
+                    f"[BASELINE-CHECK] mIoU {miou_metrics['mIoU']:.2f}% is below minimum "
+                    f"{float(args.min_miou):.2f}%"
+                )
+                if args.strict_baseline_check:
+                    raise SystemExit(msg)
+                print(f'[WARN] {msg}')
         else:
             print(f'  -> metrics: {miou_metrics}')
     else:
