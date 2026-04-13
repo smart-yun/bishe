@@ -1,0 +1,103 @@
+globals:
+  project_root: /root/bishe
+  device: cuda:0
+  shape: [512, 512]
+  batch_size: 1
+  latency_repeat: 300
+
+  prune_defaults:
+    mode: mlp_bottleneck
+    importance: group_magnitude
+    prune_stages: [2, 3, 4]
+    iterative_steps: 5
+    max_pruning_ratio: 0.50
+    round_to: 8
+
+  finetune_defaults:
+    epochs: 20
+    lr: 3e-5
+    weight_decay: 0.01
+
+  models:
+    b0:
+      config: configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py
+      checkpoint: runs/B0_best_mIoU_v1.pth
+      baseline_output_dir: output/segformer_b0_baseline
+
+    b1:
+      config: configs/railsem19/segformer_b1_rs19_512x512_100ep_rtx4090.py
+      checkpoint: /root/bishe/runs/B1_best_mIoU.pth
+      baseline_output_dir: output/segformer_b1_baseline
+
+experiments:
+  b0_base:
+    model: b0
+    type: baseline
+
+  b1_base:
+    model: b1
+    type: baseline
+
+  b0_p05:
+    model: b0
+    type: prune
+    ratio: 0.05
+
+  b0_p10:
+    model: b0
+    type: prune
+    ratio: 0.10
+
+  b0_p15:
+    model: b0
+    type: prune
+    ratio: 0.15
+
+  b1_p10:
+    model: b1
+    type: prune
+    ratio: 0.10
+
+  b1_p20:
+    model: b1
+    type: prune
+    ratio: 0.20
+
+  b1_p30:
+    model: b1
+    type: prune
+    ratio: 0.30
+  
+  b1_p50:
+    model: b1
+    type: prune
+    ratio: 0.50
+
+  b1_p20_global:
+  model: b1
+  type: prune
+  ratio: 0.20
+  global_pruning: true
+  isomorphic: false
+
+  b1_p20_global_iso:
+    model: b1
+    type: prune
+    ratio: 0.20
+    global_pruning: true
+    isomorphic: true
+
+  b1_p30_global:
+    model: b1
+    type: prune
+    ratio: 0.30
+    global_pruning: true
+    isomorphic: false
+
+  b1_p30_global_iso:
+    model: b1
+    type: prune
+    ratio: 0.30
+    global_pruning: true
+    isomorphic: true
+

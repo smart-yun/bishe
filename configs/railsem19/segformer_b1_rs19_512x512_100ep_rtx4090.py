@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# SegFormer-B0 baseline for RailSem19
-# 150 epochs, RTX4090-friendly, 512x512, iter-based with epoch-equivalent validation
+# SegFormer-B1 baseline for RailSem19
+# 100 epochs, RTX4090-friendly, 512x512, iter-based with epoch-equivalent validation
 
 _base_ = [
-    'mmseg::segformer/segformer_mit-b0_8xb2-160k_ade20k-512x512.py',
+    'mmseg::segformer/segformer_mit-b1_8xb2-160k_ade20k-512x512.py',
 ]
 
 # Import project-local modules (custom dataset)
@@ -81,7 +81,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=8,
+    batch_size=4,
     num_workers=8,
     persistent_workers=True,
     pin_memory=True,
@@ -134,8 +134,8 @@ test_dataloader = dict(
 train_size = 6800
 train_batch_size = 4
 iters_per_epoch = train_size // train_batch_size   # 1700
-max_epochs = 150
-max_iters = iters_per_epoch * max_epochs           # 255000
+max_epochs = 100
+max_iters = iters_per_epoch * max_epochs           # 170000
 
 train_cfg = dict(type='IterBasedTrainLoop', max_iters=max_iters, val_interval=iters_per_epoch)
 val_cfg = dict(type='ValLoop')
@@ -204,7 +204,7 @@ default_hooks = dict(
 # -----------------------
 # Runtime
 # -----------------------
-work_dir = 'runs/rs19/segformer_b0_512x512_150ep_rtx4090'
+work_dir = 'runs/rs19/segformer_b1_512x512_100ep_rtx4090'
 
 # resume = False
 

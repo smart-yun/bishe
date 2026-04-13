@@ -1,0 +1,14 @@
+python src/prune.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --checkpoint runs/B0_best_mIoU_v1.pth \
+  --device cuda:0 \
+  --shape 512 512 \
+  --mode mlp_bottleneck \
+  --importance group_magnitude \
+  --prune-stages 2 3 4 \
+  --pruning-ratio 0.10 \
+  --iterative-steps 5 \
+  --max-pruning-ratio 0.20 \
+  --round-to 8 \
+  --fail-fast-attn-violation \
+  --output-dir output/segformer_b0_mlp10

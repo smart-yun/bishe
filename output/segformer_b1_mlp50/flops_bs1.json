@@ -1,0 +1,16 @@
+{
+  "backend": "fvcore",
+  "params": 10593491,
+  "params_m": 10.593491,
+  "macs": 6764756992,
+  "macs_g": 6.764756992,
+  "flops": 13529513984,
+  "flops_g": 13.529513984,
+  "shape": [
+    512,
+    512
+  ],
+  "batch_size": 1,
+  "device": "cuda:0",
+  "errors": []
+}
