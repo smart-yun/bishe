@@ -74,11 +74,11 @@ experiments:
     ratio: 0.50
 
   b1_p20_global:
-  model: b1
-  type: prune
-  ratio: 0.20
-  global_pruning: true
-  isomorphic: false
+    model: b1
+    type: prune
+    ratio: 0.20
+    global_pruning: true
+    isomorphic: false
 
   b1_p20_global_iso:
     model: b1
