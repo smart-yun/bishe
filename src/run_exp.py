@@ -24,10 +24,12 @@ def parse_args():
         "--variant",
         default=None,
         choices=["baseline", "pruned", "ft"],
-        help="Used for eval/flops/latency. "
-             "baseline = baseline checkpoint, "
-             "pruned = pruned full model before finetune, "
-             "ft = finetuned full model",
+        help=(
+            "Used for eval/flops/latency. "
+            "baseline = baseline checkpoint, "
+            "pruned = pruned full model before finetune, "
+            "ft = finetuned full model"
+        ),
     )
     parser.add_argument(
         "--config-file",
@@ -49,6 +51,21 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
 
 def ratio_to_tag(ratio: float) -> str:
     return f"{int(round(float(ratio) * 100)):02d}"
+
+
+def short_mode_name(mode: str) -> str:
+    return {
+        "mlp_bottleneck": "mlp",
+        "uniform_linear": "uni",
+    }.get(mode, mode)
+
+
+def short_importance_name(importance: str) -> str:
+    return {
+        "group_magnitude": "gm",
+        "magnitude": "mag",
+        "taylor": "tay",
+    }.get(importance, importance)
 
 
 def get_exp(cfg: dict[str, Any], exp_name: str) -> dict[str, Any]:
@@ -82,6 +99,19 @@ def resolve_ft_full_model(ft_dir: Path) -> str:
     return str(ft_dir / "best_full_model.pth")
 
 
+def get_prune_cfg(cfg: dict[str, Any], exp: dict[str, Any]) -> dict[str, Any]:
+    pd = cfg["globals"]["prune_defaults"]
+    return {
+        "mode": exp.get("mode", pd["mode"]),
+        "importance": exp.get("importance", pd["importance"]),
+        "prune_stages": exp.get("prune_stages", pd["prune_stages"]),
+        "iterative_steps": exp.get("iterative_steps", pd["iterative_steps"]),
+        "max_pruning_ratio": exp.get("max_pruning_ratio", pd["max_pruning_ratio"]),
+        "round_to": exp.get("round_to", pd["round_to"]),
+        "taylor_batches": exp.get("taylor_batches", pd.get("taylor_batches", 10)),
+    }
+
+
 def get_paths(cfg: dict[str, Any], exp: dict[str, Any]) -> dict[str, str]:
     model_key = exp["model"]
     model_info = get_model_info(cfg, model_key)
@@ -95,6 +125,10 @@ def get_paths(cfg: dict[str, Any], exp: dict[str, Any]) -> dict[str, str]:
     if exp["type"] == "baseline":
         return paths
 
+    prune_cfg = get_prune_cfg(cfg, exp)
+    mode = prune_cfg["mode"]
+    importance = prune_cfg["importance"]
+
     ratio = float(exp["ratio"])
     tag = ratio_to_tag(ratio)
 
@@ -104,10 +138,12 @@ def get_paths(cfg: dict[str, Any], exp: dict[str, Any]) -> dict[str, str]:
     elif exp.get("global_pruning", False):
         suffix = "_g"
 
-    run_tag = f"mlp{tag}{suffix}"
+    run_tag = f"{short_mode_name(mode)}_{short_importance_name(importance)}_{tag}{suffix}"
 
     paths["ratio"] = str(ratio)
     paths["tag"] = tag
+    paths["mode"] = mode
+    paths["importance"] = importance
     paths["run_tag"] = run_tag
     paths["pruned_output_dir"] = f"output/segformer_{model_key}_{run_tag}"
     paths["pruned_model"] = f"output/segformer_{model_key}_{run_tag}/model_pruned.pth"
@@ -134,7 +170,7 @@ def build_prune_cmd(cfg: dict[str, Any], exp: dict[str, Any], paths: dict[str, s
         raise ValueError("Prune task is not valid for baseline experiment.")
 
     gd = cfg["globals"]
-    pd = gd["prune_defaults"]
+    prune_cfg = get_prune_cfg(cfg, exp)
 
     cmd = [
         sys.executable,
@@ -143,15 +179,18 @@ def build_prune_cmd(cfg: dict[str, Any], exp: dict[str, Any], paths: dict[str, s
         "--checkpoint", paths["checkpoint"],
         "--device", gd["device"],
         "--shape", str(gd["shape"][0]), str(gd["shape"][1]),
-        "--mode", pd["mode"],
-        "--importance", pd["importance"],
-        "--prune-stages", *[str(x) for x in pd["prune_stages"]],
+        "--mode", prune_cfg["mode"],
+        "--importance", prune_cfg["importance"],
+        "--prune-stages", *[str(x) for x in prune_cfg["prune_stages"]],
         "--pruning-ratio", str(exp["ratio"]),
-        "--iterative-steps", str(pd["iterative_steps"]),
-        "--max-pruning-ratio", str(pd["max_pruning_ratio"]),
-        "--round-to", str(pd["round_to"]),
+        "--iterative-steps", str(prune_cfg["iterative_steps"]),
+        "--max-pruning-ratio", str(prune_cfg["max_pruning_ratio"]),
+        "--round-to", str(prune_cfg["round_to"]),
         "--output-dir", paths["pruned_output_dir"],
     ]
+
+    if prune_cfg["importance"] == "taylor":
+        cmd += ["--taylor-batches", str(prune_cfg["taylor_batches"])]
 
     if exp.get("global_pruning", False):
         cmd.append("--global-pruning")
@@ -206,7 +245,7 @@ def build_eval_cmd(cfg: dict[str, Any], exp: dict[str, Any], paths: dict[str, st
         if exp["type"] == "baseline":
             raise ValueError("Pruned eval is not valid for baseline experiment.")
         output_json = f"{paths['pruned_output_dir']}/metrics_before_ft.json"
-        work_dir = f"runs/tmp_eval_{exp['model']}_mlp{paths['tag']}"
+        work_dir = f"runs/tmp_eval_{exp['model']}_{paths['run_tag']}"
         return [
             sys.executable,
             "src/eval.py",
@@ -221,7 +260,7 @@ def build_eval_cmd(cfg: dict[str, Any], exp: dict[str, Any], paths: dict[str, st
         if exp["type"] == "baseline":
             raise ValueError("FT eval is not valid for baseline experiment.")
         output_json = f"{paths['pruned_output_dir']}/metrics_after_ft.json"
-        work_dir = f"runs/tmp_eval_{exp['model']}_mlp{paths['tag']}_ft"
+        work_dir = f"runs/tmp_eval_{exp['model']}_{paths['run_tag']}_ft"
         return [
             sys.executable,
             "src/eval.py",
@@ -349,7 +388,6 @@ def build_cmd(cfg: dict[str, Any], exp_name: str, task: str, variant: str | None
         cmd = build_latency_cmd(cfg, exp, paths, variant)
     else:
         raise ValueError(f"Unknown task: {task}")
-
 
     return cmd, cfg["globals"]["project_root"]
 

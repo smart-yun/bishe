@@ -1,4 +1,4 @@
-# ===== OS / IDE =====
+# OS / IDE
 .DS_Store
 Thumbs.db
 *.swp
@@ -6,8 +6,7 @@ Thumbs.db
 .idea/
 *:Zone.Identifier
 
-
-# ===== Python =====
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -20,24 +19,24 @@ pip-wheel-metadata/
 dist/
 build/
 
-# ===== Logs / Runs =====
-runs/
+# Logs
 *.log
 
-# ===== Training artifacts (建议不提交) =====
+# Training artifacts
+runs/
 checkpoints/
-exports/   #提交exports
-# 如果 results 里只有表格/图片（小文件）想提交，就注释掉下一行
+exports/
 results/
+output/
 
-# ===== Dataset (强烈不要提交) =====
+# Datasets
 data/
 *.zip
 *.tar
 *.tar.gz
 *.7z
 
-# ===== Large model files (默认不提交，除非你明确要用 LFS) =====
+# Model files
 *.pth
 *.pt
 *.onnx
@@ -45,30 +44,25 @@ data/
 *.trt
 *.ckpt
 
-# ===== Secrets (防止误提交) =====
+# Secrets
 .env
 *.key
 *.pem
 
-
-# datasets (do not commit)
+# Dataset subpaths
 data/railsem19/
 data/RailSem19/
 data/**/jpgs/
 data/**/uint8/
 data/**/jsons/
 
-# large outputs
+# Extra generated outputs
 results/vis_check/
-checkpoints/
-runs/   #提交运行结果
-
-# third-party/vendor and build artifacts
-mmsegmentation-main/
-mmsegmentation-*.whl
-condaenv.*.requirements.txt
-
-# generated curve figures/summaries
 results/curves/
 results/miou_curve_critical.png
 results/miou_curve_critical_summary.json
+
+# Third-party / build artifacts
+mmsegmentation-main/
+mmsegmentation-*.whl
+condaenv.*.requirements.txt

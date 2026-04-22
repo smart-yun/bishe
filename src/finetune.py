@@ -44,6 +44,35 @@ def load_checkpoint_state_dict(ckpt_path: Path) -> dict:
     raise TypeError(f"Unexpected checkpoint type from {ckpt_path}: {type(ckpt)}")
 
 
+def disable_pretrained_init_cfg(node):
+    """Recursively disable pretrained/init_cfg loading inside a mmengine Config/ConfigDict."""
+    if node is None:
+        return
+
+    # mmengine ConfigDict behaves like dict for membership/indexing
+    try:
+        if "pretrained" in node:
+            node["pretrained"] = None
+    except Exception:
+        pass
+
+    try:
+        if "init_cfg" in node:
+            node["init_cfg"] = None
+    except Exception:
+        pass
+
+    # recurse into nested dict-like children
+    try:
+        items = list(node.items())
+    except Exception:
+        return
+
+    for _, v in items:
+        if isinstance(v, (dict, list, tuple)):
+            disable_pretrained_init_cfg(v)
+
+
 def save_full_models(
     work_dir: Path,
     trained_model: torch.nn.Module,
@@ -80,6 +109,11 @@ def main():
     cfg.work_dir = args.work_dir
     cfg.resume = False
     cfg.load_from = None
+
+    # Critical: disable all pretrained/init_cfg loading from config
+    # so the runner won't try to load official SegFormer backbone weights
+    # into the already-pruned structure.
+    disable_pretrained_init_cfg(cfg.model)
 
     iters_per_epoch = int(getattr(cfg, "iters_per_epoch", 0))
     if iters_per_epoch <= 0:

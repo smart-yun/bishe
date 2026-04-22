@@ -1,14 +1,14 @@
 {
   "backend": "torch_pruning_official",
-  "latency_ms_mean": 8.451516151428223,
-  "latency_ms_std": 0.15461425483226776,
-  "fps": 118.32196520514367,
+  "latency_ms_mean": 8.07266616821289,
+  "latency_ms_std": 0.1830463856458664,
+  "fps": 123.87481151365111,
   "shape": [
     512,
     512
   ],
   "batch_size": 1,
-  "repeat": 300,
+  "repeat": 3000,
   "warmup": 50,
   "device": "cuda:0"
 }
