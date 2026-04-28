@@ -19,20 +19,30 @@ def kd_kl_div_loss(
     student_logits: torch.Tensor,
     teacher_logits: torch.Tensor,
     tau: float = 4.0,
+    conf_thresh: float = 0.0,
 ) -> torch.Tensor:
-    """Logit distillation for dense prediction.
-
-    Args:
-        student_logits: Tensor of shape (N, C, H, W)
-        teacher_logits: Tensor of shape (N, C, H, W)
-        tau: temperature
+    """
+    Pixel-wise logit distillation for dense semantic segmentation.
+    If conf_thresh > 0, only high-confidence teacher pixels are used.
     """
     teacher_logits = _resize_like(teacher_logits, student_logits)
 
     log_p_s = F.log_softmax(student_logits / tau, dim=1)
     p_t = F.softmax(teacher_logits / tau, dim=1)
 
-    return F.kl_div(log_p_s, p_t, reduction='batchmean') * (tau ** 2)
+    # KL per pixel: shape (N, H, W)
+    per_pixel_kl = F.kl_div(
+        log_p_s,
+        p_t,
+        reduction='none'
+    ).sum(dim=1) * (tau ** 2)
+
+    if conf_thresh > 0:
+        teacher_conf = p_t.max(dim=1).values  # (N, H, W)
+        mask = (teacher_conf >= conf_thresh).float()
+        return (per_pixel_kl * mask).sum() / mask.sum().clamp_min(1.0)
+
+    return per_pixel_kl.mean()
 
 
 def channel_wise_divergence(

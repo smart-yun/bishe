@@ -11,7 +11,7 @@ globals:
     prune_stages: [2, 3, 4]
     iterative_steps: 8
     max_pruning_ratio: 1.00
-    round_to: 40
+    round_to: 8
     taylor_batches: 64
 
   finetune_defaults:
@@ -49,12 +49,172 @@ experiments:
     model: b0
     type: prune
     ratio: 0.30
-    
+    finetune_epochs: 75
+    finetune_lr: 3e-5
+
   b0_p50:
     model: b0
     type: prune
     ratio: 0.50
-    finetune_epochs: 25
+    finetune_epochs: 100
+    finetune_lr: 2e-5
+
+  b0_p70:
+    model: b0
+    type: prune
+    ratio: 0.70
+    finetune_epochs: 100
+    finetune_lr: 2e-5
+
+  # ========== B0 global pruning ==========
+  b0_p10_global:
+    model: b0
+    type: prune
+    ratio: 0.10
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p15_global:
+    model: b0
+    type: prune
+    ratio: 0.15
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p20_global:
+    model: b0
+    type: prune
+    ratio: 0.20
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p30_global:
+    model: b0
+    type: prune
+    ratio: 0.30
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 75
+    finetune_lr: 3e-5
+
+  b0_p50_global:
+    model: b0
+    type: prune
+    ratio: 0.50
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 100
+    finetune_lr: 2e-5
+  # ========== B0 global + isomorphic pruning ==========
+  b0_p10_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.10
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p15_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.15
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p20_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.20
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_p30_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.30
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 75
+    finetune_lr: 3e-5
+
+  b0_p50_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.50
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 2e-5
+
+  b0_p70_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.70
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 2e-5
+  
+  b0_p70_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.70
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 2e-5
+
+  # ========== B0 uniform_linear
+  b0_uni_p10_global:
+    model: b0
+    type: prune
+    mode: uniform_linear
+    ratio: 0.10
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_uni_p10_global_iso:
+    model: b0
+    type: prune
+    mode: uniform_linear
+    ratio: 0.10
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_uni_p15_global:
+    model: b0
+    type: prune
+    mode: uniform_linear
+    ratio: 0.15
+    global_pruning: true
+    isomorphic: false
+    finetune_epochs: 50
+    finetune_lr: 3e-5
+
+  b0_uni_p50_global_iso:
+    model: b0
+    type: prune
+    mode: uniform_linear
+    ratio: 0.5
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 50
+    finetune_lr: 3e-5
 ######################################
   b1_p10:
     model: b1

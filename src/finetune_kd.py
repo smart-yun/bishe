@@ -98,17 +98,7 @@ def strip_student_prefix(state_dict: Dict[str, torch.Tensor]) -> Dict[str, torch
 
 
 class KDPrunedSegmentor(BaseModel):
-    """A thin teacher-student wrapper around the pruned student model.
-
-    Notes:
-        1. This implementation is intentionally lightweight and drop-in.
-        2. It computes segmentation loss from the student as usual.
-        3. It adds:
-           - logit KD on decode logits
-           - CWD on one backbone feature map
-        4. For mlp_bottleneck pruning in this repo, feature channel dimensions remain
-           stable, so CWD is the best first choice.
-    """
+    """Teacher-student wrapper for pruned student finetuning with KD."""
 
     def __init__(
         self,
@@ -154,9 +144,7 @@ class KDPrunedSegmentor(BaseModel):
     def loss(self, inputs: torch.Tensor, data_samples=None) -> Dict[str, torch.Tensor]:
         losses = self.student.loss(inputs, data_samples)
 
-        # Minimal-intrusion implementation: compute features/logits once more for KD.
-        # This is slower than a hook-optimized implementation, but much easier to
-        # integrate into the current repo without rewriting mmseg internals.
+        # Simple integration: recompute features for KD
         student_feats = self.student.extract_feat(inputs)
         with torch.no_grad():
             teacher_feats = self.teacher.extract_feat(inputs)
@@ -174,6 +162,12 @@ class KDPrunedSegmentor(BaseModel):
         if self.use_cwd and self.cwd_loss_weight > 0:
             student_feat = self._select_feat(student_feats)
             teacher_feat = self._select_feat(teacher_feats)
+            if student_feat.shape != teacher_feat.shape:
+                raise RuntimeError(
+                    f'CWD feature shape mismatch: student={tuple(student_feat.shape)}, '
+                    f'teacher={tuple(teacher_feat.shape)}. '
+                    f'If you are using aggressive uniform/global pruning, try --distill logit first.'
+                )
             losses['loss_kd_cwd'] = self.cwd_loss_weight * channel_wise_divergence(
                 student_feat=student_feat,
                 teacher_feat=teacher_feat,
@@ -186,7 +180,16 @@ class KDPrunedSegmentor(BaseModel):
         return self.student.predict(inputs, data_samples)
 
     def _forward(self, inputs: torch.Tensor, data_samples=None):
-        return self.student._forward(inputs, data_samples)
+        return self.student(inputs, data_samples=data_samples, mode='tensor')
+
+    def forward(self, inputs: torch.Tensor, data_samples=None, mode: str = 'tensor'):
+        if mode == 'loss':
+            return self.loss(inputs, data_samples)
+        if mode == 'predict':
+            return self.predict(inputs, data_samples)
+        if mode == 'tensor':
+            return self._forward(inputs, data_samples)
+        raise RuntimeError(f'Invalid mode: {mode}')
 
 
 def save_full_models(
@@ -262,6 +265,7 @@ def main():
     runner = Runner.from_cfg(cfg)
 
     device = resolve_device(args.device)
+
     student = torch.load(args.pruned_model, map_location='cpu')
     if not isinstance(student, nn.Module):
         raise TypeError(f'--pruned-model must be a full torch.nn.Module, got {type(student)}')

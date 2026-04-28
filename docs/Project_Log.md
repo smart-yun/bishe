@@ -44,7 +44,14 @@ git stash#先临时藏起来
 git pull --rebase origin main
 git stash pop
 
-明日计划
+
+tmux 使用(tmux是一个终端复用工具，可以在一个终端窗口中创建多个会话，每个会话可以有多个窗口，每个窗口可以有多个标签页，非常适合远程服务器操作和长时间运行的任务 关闭后会话仍然存在，可以随时重新连接继续工作)
+tmux new -s (kdtrain) #创建一个新的会话，名字叫kdtrain
+tmux ls #查看当前有哪些会话
+
+tmux attach -t (kdtrain) #连接到名为kdtrain的会话
+tmux detach #暂时离开当前会话，保持会话在后台运行
+
 
 
 
