@@ -65,6 +65,13 @@ experiments:
     ratio: 0.70
     finetune_epochs: 100
     finetune_lr: 2e-5
+  
+  b0_p75:
+    model: b0
+    type: prune
+    ratio: 0.75
+    finetune_epochs: 100
+    finetune_lr: 2e-5
 
   # ========== B0 global pruning ==========
   b0_p10_global:
@@ -173,6 +180,15 @@ experiments:
     global_pruning: true
     isomorphic: true
     finetune_epochs: 50
+    finetune_lr: 2e-5
+
+  b0_p75_global_iso:
+    model: b0
+    type: prune
+    ratio: 0.75
+    global_pruning: true
+    isomorphic: true
+    finetune_epochs: 100
     finetune_lr: 2e-5
 
   # ========== B0 uniform_linear

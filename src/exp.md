@@ -91,6 +91,118 @@
   python src/run_exp.py --exp b0_p70 --task flops --variant ft
   python src/run_exp.py --exp b0_p70 --task latency --variant ft
 ```
+### b0\_p75
+
+```
+  python src/run_exp.py --exp b0_p75 --task prune
+  python src/run_exp.py --exp b0_p75 --task eval --variant pruned
+  python src/run_exp.py --exp b0_p75 --task flops --variant pruned
+  python src/run_exp.py --exp b0_p75 --task latency --variant pruned 
+
+python src/run_exp.py --exp b0_p75 --task finetune
+python src/run_exp.py --exp b0_p75 --task eval --variant ft
+python src/run_exp.py --exp b0_p75 --task flops --variant ft
+python src/run_exp.py --exp b0_p75 --task latency --variant ft
+```
+
+### B0-P75 + KD蒸馏
+```
+python src/finetune_kd.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --pruned-model output/segformer_b0_mlp_gm_75/model_pruned.pth \
+  --teacher-config configs/railsem19/segformer_b1_rs19_512x512_100ep_rtx4090.py \
+  --teacher-checkpoint /root/bishe/runs/B1_best_mIoU.pth \
+  --device cuda:0 \
+  --work-dir runs/rs19/b0_p75_ft50_kd_logit \
+  --finetune-epochs 50 \
+  --lr 2e-5 \
+  --weight-decay 0.01 \
+  --distill logit \
+  --kd-temperature 4.0 \
+  --kd-loss-weight 0.05
+```
+
+### B0-P75 + Dice
+```
+python src/finetune_dice.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --pruned-model output/segformer_b0_mlp_gm_75/model_pruned.pth \
+  --device cuda:0 \
+  --work-dir runs/rs19/b0_p75_ft50_ce_dice \
+  --finetune-epochs 50 \
+  --lr 2e-5 \
+  --weight-decay 0.01 \
+  --ce-loss-weight 1.0 \
+  --dice-loss-weight 0.5
+
+### 在Dice loss的微调结果基础上继续进行KD蒸馏：
+
+python src/finetune_kd.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --pruned-model runs/rs19/b0_p75_ft50_ce_dice/best_full_model.pth \
+  --teacher-config configs/railsem19/segformer_b1_rs19_512x512_100ep_rtx4090.py \
+  --teacher-checkpoint /root/bishe/runs/B1_best_mIoU.pth \
+  --device cuda:0 \
+  --work-dir runs/rs19/b0_p75_ft50_ce_dice_ft50_kd_logit \
+  --finetune-epochs 50 \
+  --lr 2e-5 \
+  --weight-decay 0.01 \
+  --distill logit \
+  --kd-temperature 4.0 \
+  --kd-loss-weight 0.05
+```
+
+### B0-75 参数测量脚本 
+评估蒸馏
+```
+python src/eval.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --model runs/rs19/b0_p75_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --work-dir runs/rs19/eval_b0_p75_ft50_kd_logit \
+  --output-json output/segformer_b0_mlp_gm_75/metrics_ft50_kd_logit.json
+
+python src/flops.py \
+  --model runs/rs19/b0_p75_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --shape 512 512 \
+  --batch-size 1 \
+  --output-json output/segformer_b0_mlp_gm_75/flopss_ft50_kd_logit.json
+
+python src/latency.py \
+  --model runs/rs19/b0_p75_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --shape 512 512 \
+  --batch-size 1 \
+  --repeat 300 \
+  --output-json output/segformer_b0_mlp_gm_75/latency_ft50_kd_logit.json
+
+```
+
+评估蒸馏+Dice
+```
+python src/eval.py \
+  --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
+  --model runs/rs19/b0_p75_ft50_ce_dice_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --work-dir runs/rs19/eval_b0_p75_ft50_ce_dice_ft50_kd_logit \
+  --output-json output/segformer_b0_mlp_gm_75/metrics_ft50_ce_dice_ft50_kd_logit.json
+
+python src/flops.py \
+  --model runs/rs19/b0_p75_ft50_ce_dice_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --shape 512 512 \
+  --batch-size 1 \
+  --output-json output/segformer_b0_mlp_gm_75/flops_ft50_ce_dice_ft50_kd_logit.json
+
+python src/latency.py \
+  --model runs/rs19/b0_p75_ft50_ce_dice_ft50_kd_logit/best_full_model.pth \
+  --device cuda:0 \
+  --shape 512 512 \
+  --batch-size 1 \
+  --repeat 300 \
+  --output-json output/segformer_b0_mlp_gm_75/latency_ft50_ce_dice_ft50_kd_logit.json
+```
 
 ### B0 global pruning
 ### b0\_p30\_global
@@ -155,6 +267,18 @@
   python src/run_exp.py --exp b0_p70_global_iso --task latency --variant ft
 ```
 
+### b0\_p75\_global\_iso
+```
+  python src/run_exp.py --exp b0_p75_global_iso --task prune
+  python src/run_exp.py --exp b0_p75_global_iso --task eval --variant pruned
+  python src/run_exp.py --exp b0_p75_global_iso --task flops --variant pruned
+  python src/run_exp.py --exp b0_p75_global_iso --task latency --variant pruned
+  python src/run_exp.py --exp b0_p75_global_iso --task finetune
+  python src/run_exp.py --exp b0_p75_global_iso --task eval --variant ft
+  python src/run_exp.py --exp b0_p75_global_iso --task flops --variant ft
+  python src/run_exp.py --exp b0_p75_global_iso --task latency --variant ft
+```
+
 ### b0_uni_p30_global_iso
 ```
   python src/run_exp.py --exp b0_uni_p30_global_iso --task prune
@@ -197,25 +321,25 @@
 ```
 python src/eval.py \
   --config configs/railsem19/segformer_b0_rs19_512x512_150ep_rtx4090.py \
-  --model runs/rs19/b0_pruned_ft_ce_dice/best_full_model.pth \
+  --model runs/rs19/b1_p50_ft100_kd_logit/best_full_model.pth \
   --device cuda:0 \
-  --work-dir runs/tmp_eval_b0_uni_p50_global_iso_ft_ce_dice \
-  --output-json output/segformer_b0_gm_50_ce+dice/metrics_after_ft_ce_dice.json
+  --work-dir runs/tmp_eval_b1_mlp_gm_50_pruned_kd \
+  --output-json output/segformer_b1_mlp_gm_50_kd_ft100/metrics_pruned.json
 
 python src/flops.py \
-  --model runs/rs19/b0_pruned_ft_ce_dice/best_full_model.pth \
+  --model runs/rs19/b1_p50_ft100_kd_logit/best_full_model.pth \
   --device cuda:0 \
   --shape 512 512 \
   --batch-size 1 \
-  --output-json output/segformer_b0_gm_50_ce+dice/flops_after_ft_ce_dice_bs1.json
+  --output-json output/segformer_b1_mlp_gm_50_kd_ft100/flops_pruned_bs1.json
 
 python src/latency.py \
-  --model runs/rs19/b0_pruned_ft_ce_dice/best_full_model.pth \
+  --model runs/rs19/b1_p50_ft100_kd_logit/best_full_model.pth \
   --device cuda:0 \
   --shape 512 512 \
   --batch-size 1 \
   --repeat 300 \
-  --output-json output/segformer_b0_gm_50_ce+dice/latency_after_ft_ce_dice_bs1.json
+  --output-json output/segformer_b1_mlp_gm_50_kd_ft100/latency_pruned_bs1.json
 ```
 
 ---
@@ -615,4 +739,96 @@ python src/finetune_kd.py \
   --cwd-loss-weight 1.0 \
   --cwd-feature-index -1
 
+```
+
+
+
+### 模型ONNX导出
+```
+MODEL_PATH="runs/rs19/b0_pruned_ft_ce_dice/best_full_model.pth"
+
+PYTHONPATH=src python deploy/scripts/export_pruned_to_onnx.py \
+  --model "$MODEL_PATH" \
+  --output deploy/onnx/b0_mlp_gm50_ce_dice_512.onnx \
+  --height 512 \
+  --width 512 \
+  --opset 13 \
+  --device cuda:0 \
+  2>&1 | tee deploy/logs/export_b0_mlp_gm50_ce_dice_512.log
+```
+
+###  简化ONNX模型
+```
+python -m onnxsim \
+  deploy/onnx/b0_mlp_gm50_ce_dice_512.onnx \
+  deploy/onnx/b0_mlp_gm50_ce_dice_512_sim.onnx \
+  2>&1 | tee deploy/logs/simplify_b0_mlp_gm50_ce_dice_512.log
+
+Simplifying...
+Finish! Here is the difference:
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃            ┃ Original Model ┃ Simplified Model ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ Add        │ 108            │ 100              │
+│ Concat     │ 31             │ 1                │
+│ Constant   │ 508            │ 224              │
+│ Conv       │ 40             │ 40               │
+│ Div        │ 46             │ 46               │
+│ Erf        │ 8              │ 8                │
+│ Gather     │ 16             │ 16               │
+│ Gemm       │ 8              │ 8                │
+│ MatMul     │ 32             │ 32               │
+│ Mod        │ 8              │ 0                │
+│ Mul        │ 46             │ 46               │
+│ Pow        │ 30             │ 30               │
+│ ReduceMean │ 60             │ 60               │
+│ Relu       │ 5              │ 5                │
+│ Reshape    │ 100            │ 78               │
+│ Resize     │ 4              │ 4                │
+│ Shape      │ 30             │ 0                │
+│ Slice      │ 38             │ 0                │
+│ Softmax    │ 8              │ 8                │
+│ Sqrt       │ 30             │ 30               │
+│ Squeeze    │ 8              │ 8                │
+│ Sub        │ 30             │ 30               │
+│ Transpose  │ 98             │ 98               │
+│ Unsqueeze  │ 8              │ 8                │
+│ Model Size │ 11.4MiB        │ 11.4MiB          │
+└────────────┴────────────────┴──────────────────┘
+
+python -m onnxsim \
+  deploy/onnx/b0_mlp_gm50_ce_dice_512_upsample.onnx \
+  deploy/onnx/b0_mlp_gm50_ce_dice_512_upsample_sim.onnx \
+  2>&1 | tee deploy/logs/simplify_b0_mlp_gm50_ce_dice_512_upsample.log
+Simplifying...
+Finish! Here is the difference:
+┏━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃            ┃ Original Model ┃ Simplified Model ┃
+┡━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ Add        │ 108            │ 100              │
+│ Concat     │ 32             │ 1                │
+│ Constant   │ 512            │ 225              │
+│ Conv       │ 40             │ 40               │
+│ Div        │ 46             │ 46               │
+│ Erf        │ 8              │ 8                │
+│ Gather     │ 16             │ 16               │
+│ Gemm       │ 8              │ 8                │
+│ MatMul     │ 32             │ 32               │
+│ Mod        │ 8              │ 0                │
+│ Mul        │ 46             │ 46               │
+│ Pow        │ 30             │ 30               │
+│ ReduceMean │ 60             │ 60               │
+│ Relu       │ 5              │ 5                │
+│ Reshape    │ 100            │ 78               │
+│ Resize     │ 5              │ 5                │
+│ Shape      │ 31             │ 0                │
+│ Slice      │ 39             │ 0                │
+│ Softmax    │ 8              │ 8                │
+│ Sqrt       │ 30             │ 30               │
+│ Squeeze    │ 8              │ 8                │
+│ Sub        │ 30             │ 30               │
+│ Transpose  │ 98             │ 98               │
+│ Unsqueeze  │ 8              │ 8                │
+│ Model Size │ 11.4MiB        │ 11.4MiB          │
+└────────────┴────────────────┴──────────────────┘
 ```

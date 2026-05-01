@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 # =========================
 # Only modify these settings
 # =========================
-LOG_FILE = "runs/rs19/segformer_b0_uni_gm_50_gi_ft/20260427_151751/vis_data/20260427_151751.json"
+LOG_FILE = "runs/rs19/b1_p50_ft30_kd_logit_T4_w01/20260427_104810/vis_data/20260427_104810.json"
 OUT_FILE = None          # None means saving to the same directory as the log file
 SMOOTH_WINDOW = 5        # Set to 1 to disable smoothing
 

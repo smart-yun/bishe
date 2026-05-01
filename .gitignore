@@ -55,6 +55,8 @@ data/RailSem19/
 data/**/jpgs/
 data/**/uint8/
 data/**/jsons/
+deploy/val_official
+deploy/val_subset
 
 # Extra generated outputs
 results/vis_check/
